@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin Panel — Cohort 2 CPI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gelasio:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#F3F4F6; --surface:#FFFFFF; --surface-2:#F8FAFC; --ink:#1F2937; --head:#111827; --muted:#6B7280; --faint:#9CA3AF;
+    --border:#E5E7EB; --hair:#EEF1F4;
+    --green:#16A34A; --green-ink:#15803D; --green-bg:#DCFCE7;
+    --purple:#7C3AED; --blue:#2563EB; --red:#DC2626; --amber:#D97706;
+    --red-bg:#FDE8EA; --red-ink:#B4232A; --amber-bg:#FEF3C7; --amber-ink:#92600A;
+    --track:#EDF0F3; --nav-bg:rgba(255,255,255,.9);
+    --grad:linear-gradient(90deg,#FDE8EA 0%,#FEF3C7 50%,#DCFCE7 100%);
+    color-scheme:light;
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --bg:#0E1116; --surface:#161B22; --surface-2:#1C222B; --ink:#D7DCE3; --head:#F0F3F7; --muted:#97A1AE; --faint:#6B7684;
+    --border:#28313C; --hair:#222A33; --track:#222A33; --nav-bg:rgba(17,21,27,.86);
+    --red-bg:#3A1E22; --red-ink:#F2A6AD; --amber-bg:#362C14; --amber-ink:#F3CE7C; --green-bg:#133222; --green-ink:#86E6AC;
+    --grad:linear-gradient(90deg,#3A1E22 0%,#362C14 50%,#133222 100%);
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0E1116; --surface:#161B22; --surface-2:#1C222B; --ink:#D7DCE3; --head:#F0F3F7; --muted:#97A1AE; --faint:#6B7684;
+    --border:#28313C; --hair:#222A33; --track:#222A33; --nav-bg:rgba(17,21,27,.86);
+    --red-bg:#3A1E22; --red-ink:#F2A6AD; --amber-bg:#362C14; --amber-ink:#F3CE7C; --green-bg:#133222; --green-ink:#86E6AC;
+    --grad:linear-gradient(90deg,#3A1E22 0%,#362C14 50%,#133222 100%);
+    color-scheme:dark;
+  }
+  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 60px)}
+  body{margin:0;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--nav-bg);backdrop-filter:blur(8px)}
+  h1,h2,h3{margin:0}
+  .serif{font-family:"Gelasio",Georgia,"Times New Roman",serif}
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* top bar */
+  .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--nav-bg);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  .topbar-in{max-width:1280px;margin:0 auto;padding:11px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .logo{font-family:"Gelasio",serif;font-weight:700;font-size:17px;color:var(--head)}
+  .logo small{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:400;color:var(--muted);font-size:13px;margin-left:8px}
+  .nav-tabs{display:flex;gap:4px;margin-left:8px}
+  .ntab{appearance:none;border:0;background:transparent;font:inherit;font-weight:500;color:var(--muted);padding:7px 15px;border-radius:9px;cursor:pointer}
+  .ntab[aria-current="true"]{background:var(--surface-2);color:var(--head);box-shadow:inset 0 0 0 1px var(--border)}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+  .btn{appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;padding:6px 13px;border-radius:9px;cursor:pointer}
+  .btn:hover{background:var(--surface-2)}
+  .iconbtn{width:32px;height:32px;padding:0;display:grid;place-items:center}
+
+  .banner{background:var(--surface-2);border-bottom:1px solid var(--border);color:var(--muted);font-size:13px}
+  .banner-in{max-width:1280px;margin:0 auto;padding:9px 24px;display:flex;gap:8px;align-items:center}
+  .banner b{color:var(--ink);font-weight:600}
+  .dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
+
+  .wrap{max-width:1280px;margin:0 auto;padding:22px 24px 80px}
+  .pagehead h1{font-family:"Gelasio",serif;font-size:30px;font-weight:600;color:var(--head);letter-spacing:-.01em}
+  .pagehead h1 em{font-style:normal;color:var(--green)}
+  .pagehead p{color:var(--muted);margin:6px 0 0}
+  .controls{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
+  select{appearance:none;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:9px 36px 9px 13px;cursor:pointer;min-width:190px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%236B7280' stroke-width='1.6'/></svg>");
+    background-repeat:no-repeat;background-position:right 13px center}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:13px}
+  .card.pad{padding:18px}
+  .panel-title{font-family:"Gelasio",serif;font-size:17px;font-weight:600;color:var(--head)}
+  .panel-sub{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+  /* stat cards row */
+  .statrow{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:16px}
+  @media(max-width:1100px){.statrow{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.statrow{grid-template-columns:1fr}}
+  .statnum{font-size:32px;font-weight:700;letter-spacing:-.02em;margin:7px 0 2px;line-height:1}
+  .statnum small{font-size:16px;font-weight:500;color:var(--faint)}
+  .statmeta{font-size:12px;color:var(--muted)}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;margin-top:10px}
+  .b-red{background:var(--red-bg);color:var(--red-ink)} .b-amber{background:var(--amber-bg);color:var(--amber-ink)} .b-green{background:var(--green-bg);color:var(--green-ink)}
+  .c-purple{color:var(--purple)} .c-blue{color:var(--blue)} .c-green{color:var(--green)} .c-ink{color:var(--head)}
+
+  /* beeswarm */
+  .swarm-wrap{margin-top:8px}
+  .swarm-foot{display:flex;justify-content:space-between;align-items:flex-end;border:1px solid var(--border);border-radius:11px;padding:12px 15px;margin-top:10px;background:var(--surface-2)}
+  .swarm-foot .big{font-family:"Gelasio",serif;font-size:22px;font-weight:600;color:var(--purple)}
+
+  /* grid of panels */
+  .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+  @media(max-width:980px){.pgrid{grid-template-columns:1fr}}
+
+  /* percentile standing */
+  .pstand{display:flex;flex-direction:column;gap:20px;margin-top:14px}
+  .ps-row .ps-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .ps-name{font-weight:600;color:var(--head);font-size:13.5px}
+  .ps-val{font-weight:700;font-size:14px}
+  .ps-bar{position:relative;height:13px;background:var(--track);border-radius:999px;overflow:visible}
+  .ps-fill{height:100%;border-radius:999px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .ps-knob{position:absolute;top:50%;width:15px;height:15px;border-radius:50%;background:var(--surface);transform:translate(-50%,-50%);box-shadow:0 0 0 3px currentColor}
+  .ps-ticks{position:absolute;inset:0}
+  .ps-tick{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--border)}
+  .ps-grad{height:8px;border-radius:999px;background:var(--grad);margin-top:9px;position:relative}
+  .ps-gtick{position:absolute;top:-2px;bottom:-2px;width:2px;background:rgba(0,0,0,.18);transform:translateX(-1px)}
+  :root[data-theme="dark"] .ps-gtick,@media(prefers-color-scheme:dark){.ps-gtick{background:rgba(255,255,255,.25)}}
+  .ps-glabels{position:relative;height:22px;margin-top:2px}
+  .ps-glabel{position:absolute;transform:translateX(-50%);text-align:center;font-size:10px;color:var(--muted);top:0}
+  .ps-glabel b{display:block;color:var(--ink);font-weight:600;font-size:11px}
+  .ps-pill{font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px;margin-left:8px;vertical-align:middle}
+
+  /* exam cards */
+  .examgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  @media(max-width:560px){.examgrid{grid-template-columns:repeat(2,1fr)}}
+  .examc{border:1px solid var(--border);border-radius:11px;padding:13px;text-align:center;background:var(--surface-2)}
+  .examc .en{font-size:12px;color:var(--muted);font-weight:600}
+  .examc .ev{font-family:"Gelasio",serif;font-size:22px;font-weight:600;color:var(--head);margin:6px 0}
+  .examc .es{font-size:11px;color:var(--faint)}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:14px}
+  table{border-collapse:collapse;width:100%;min-width:480px}
+  th,td{padding:10px 10px;text-align:left;font-size:13px;border-bottom:1px solid var(--hair);white-space:nowrap}
+  th{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  tbody tr:last-child td{border-bottom:0}
+  .rowdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:9px;vertical-align:middle;background:var(--border)}
+  .rowdot.on{background:var(--green)}
+  tr.sel td{background:var(--surface-2)}
+  tr.off td{color:var(--faint)}
+  .chip{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:22px;padding:0 7px;border-radius:6px;color:#fff;font-weight:700;font-size:12px}
+  .gap-pos{background:var(--green-bg);color:var(--green-ink);padding:1px 7px;border-radius:6px;font-weight:600;font-size:12px}
+  .gap-neg{background:var(--red-bg);color:var(--red-ink);padding:1px 7px;border-radius:6px;font-weight:600;font-size:12px}
+  .ppill{font-size:11px;color:var(--muted);font-weight:600}
+
+  .notfilled{color:var(--faint);font-style:italic}
+  .section-note{color:var(--muted);font-size:12.5px;line-height:1.6}
+  .dist{display:grid;gap:7px;margin-top:12px}
+  .dist-row{display:grid;grid-template-columns:34px 1fr 28px;align-items:center;gap:10px}
+  .dist-bar{height:20px;background:var(--track);border-radius:6px;overflow:hidden}
+  .dist-bar span{display:block;height:100%;border-radius:6px}
+  .dist-row .n{text-align:right;font-size:13px;color:var(--muted)}
+  /* settings */
+  .settings-grid{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+  @media(max-width:900px){.settings-grid{grid-template-columns:1fr}}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:13.5px}
+  .kv .k{color:var(--muted)} .kv .v{color:var(--head);font-weight:600;text-align:right}
+  .bignow{font-family:"Gelasio",serif;font-size:24px;font-weight:600;color:var(--head);margin:4px 0 3px}
+  .field{margin-top:15px} .field>label{display:block;font-size:12.5px;color:var(--head);font-weight:600;margin-bottom:6px}
+  input[type=text],input[type=number]{appearance:none;font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;width:100%}
+  input:focus,select:focus{outline:2px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:1px}
+  .hint{font-size:11.5px;color:var(--faint);margin-top:5px}
+  .field2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .savebtn{appearance:none;border:0;background:#1F2937;color:#fff;font:inherit;font-weight:600;font-size:14px;padding:12px;border-radius:11px;width:100%;cursor:pointer;margin-top:18px}
+  .savebtn:active{transform:translateY(1px)} .savebtn.ok{background:var(--green)}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .savebtn{background:var(--head);color:var(--bg)}}
+  :root[data-theme="dark"] .savebtn{background:var(--head);color:var(--bg)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const {useState, useMemo, useEffect} = React;
+
+const STUDENTS = [{"roll":1,"name":"Diksha .","email":"diksha260303official@gmail.com","mock":9,"gd":24,"mini":30,"mock100":30.0,"proj100":75.0},{"roll":2,"name":"Harshit Agarwal","email":"harshitagrawal219@gmail.com","mock":null,"gd":0,"mini":24,"mock100":null,"proj100":60.0},{"roll":3,"name":"PritamSubhash Chavhan","email":"pritam14chavhan@gmail.com","mock":17,"gd":24,"mini":30,"mock100":56.7,"proj100":75.0},{"roll":4,"name":"Kshitij Chhabariya","email":"kshitijyadav30275@gmail.com","mock":14,"gd":20,"mini":38,"mock100":46.7,"proj100":95.0},{"roll":5,"name":"Anubhav lal Das","email":"anubhavlaldass@gmail.com","mock":11,"gd":23,"mini":28,"mock100":36.7,"proj100":70.0},{"roll":6,"name":"Chaitanya Bharat Dokara","email":"chaitanyadokara@gmail.com","mock":7,"gd":23,"mini":28,"mock100":23.3,"proj100":70.0},{"roll":7,"name":"Riya Hariya","email":"riyaved530@gmail.com","mock":9,"gd":23,"mini":32,"mock100":30.0,"proj100":80.0},{"roll":8,"name":"Gurunath Girish Hirve","email":"gurunath.hirve1998@protonmail.com","mock":4,"gd":23,"mini":24,"mock100":13.3,"proj100":60.0},{"roll":9,"name":"Arsum Javaid","email":"arsum.mech@gmail.com","mock":11,"gd":23,"mini":28,"mock100":36.7,"proj100":70.0},{"roll":10,"name":"Dhairya Joshi","email":"cloud.dhairya23@gmail.com","mock":7,"gd":20,"mini":36,"mock100":23.3,"proj100":90.0},{"roll":11,"name":"Vysag Karunakaran","email":"vysagkk@gmail.com","mock":9,"gd":26,"mini":30,"mock100":30.0,"proj100":75.0},{"roll":12,"name":"Gaurang Khandelwal","email":"gaurangkhandelwal.knp@gmail.com","mock":5,"gd":20,"mini":28,"mock100":16.7,"proj100":70.0},{"roll":13,"name":"Nisha Kherala","email":"nishakherala97@gmail.com","mock":15,"gd":24,"mini":34,"mock100":50.0,"proj100":85.0},{"roll":14,"name":"Rishabh Kothari","email":"rishabhkothari898@gmail.com","mock":17,"gd":23,"mini":30,"mock100":56.7,"proj100":75.0},{"roll":15,"name":"Nitya Kushwah","email":"nityakushwah170@gmail.com","mock":26,"gd":26,"mini":36,"mock100":86.7,"proj100":90.0},{"roll":16,"name":"Akhil R Maliwal","email":"akhil19598@gmail.com","mock":15,"gd":24,"mini":36,"mock100":50.0,"proj100":90.0},{"roll":17,"name":"Adwin Justa Manuel","email":"adwinjustamanuel913@gmail.com","mock":13,"gd":20,"mini":30,"mock100":43.3,"proj100":75.0},{"roll":18,"name":"Malav Dharmen Modi","email":"malavmodi2004@gmail.com","mock":19,"gd":24,"mini":38,"mock100":63.3,"proj100":95.0},{"roll":19,"name":"VasudevKamath Mundkur","email":"vasudevkamathm@gmail.com","mock":15,"gd":24,"mini":36,"mock100":50.0,"proj100":90.0},{"roll":20,"name":"Paddhati Nirwan","email":"paddhatid@gmail.com","mock":17,"gd":24,"mini":34,"mock100":56.7,"proj100":85.0},{"roll":21,"name":"Sharad Panchal","email":"sharadpanchal3769@gmail.com","mock":17,"gd":23,"mini":30,"mock100":56.7,"proj100":75.0},{"roll":22,"name":"Rohit Pandey","email":"rohit.pandeyecon@gmail.com","mock":19,"gd":24,"mini":30,"mock100":63.3,"proj100":75.0},{"roll":23,"name":"Mohit Pasupuleti","email":"mohitvishnu98@gmail.com","mock":13,"gd":26,"mini":38,"mock100":43.3,"proj100":95.0},{"roll":24,"name":"Harshal Patil","email":"21107060.harshal.patil@gmail.com","mock":9,"gd":20,"mini":32,"mock100":30.0,"proj100":80.0},{"roll":25,"name":"Kunal Pidiha","email":"kunalpidiha57@gmail.com","mock":11,"gd":20,"mini":26,"mock100":36.7,"proj100":65.0},{"roll":26,"name":"Harshvardhan Raj","email":"harshavardhanraj197@gmail.com","mock":11,"gd":23,"mini":38,"mock100":36.7,"proj100":95.0},{"roll":27,"name":"Rakesh Kumar Reddy","email":"rakesh.kesavareddygari@gmail.com","mock":13,"gd":23,"mini":36,"mock100":43.3,"proj100":90.0},{"roll":28,"name":"Om Raghunandan Rohamare","email":"omrohamare.skn.comp@gmail.com","mock":9,"gd":23,"mini":30,"mock100":30.0,"proj100":75.0},{"roll":29,"name":"Roshni Sailesh Bhai Patel","email":"roshnipatel150311@gmail.com","mock":13,"gd":24,"mini":26,"mock100":43.3,"proj100":65.0},{"roll":30,"name":"Divyanshi Sethi","email":"diyasethi1111@gmail.com","mock":11,"gd":20,"mini":26,"mock100":36.7,"proj100":65.0},{"roll":31,"name":"Aditya Kumar Sharma","email":"08sharma.aditya@gmail.com","mock":11,"gd":26,"mini":34,"mock100":36.7,"proj100":85.0},{"roll":32,"name":"Vidit Sharma","email":"vdtshrma2812@gmail.com","mock":17,"gd":24,"mini":30,"mock100":56.7,"proj100":75.0},{"roll":33,"name":"Aayush Singh","email":"aayushsinghx0709@gmail.com","mock":10,"gd":24,"mini":34,"mock100":33.3,"proj100":85.0},{"roll":34,"name":"Sagar Bhati Singh","email":"sagarbhati052@gmail.com","mock":13,"gd":26,"mini":36,"mock100":43.3,"proj100":90.0},{"roll":35,"name":"Shivam Singh","email":"shivam628m@gmail.com","mock":9,"gd":20,"mini":30,"mock100":30.0,"proj100":75.0},{"roll":36,"name":"Mihir Soni","email":"mihirsoni89@gmail.com","mock":9,"gd":24,"mini":24,"mock100":30.0,"proj100":60.0},{"roll":37,"name":"Nitish Varma","email":"nitishvarma50@gmail.com","mock":23,"gd":26,"mini":32,"mock100":76.7,"proj100":80.0},{"roll":38,"name":"Chetan Verma","email":"vchetan759@gmail.com","mock":13,"gd":23,"mini":30,"mock100":43.3,"proj100":75.0},{"roll":39,"name":"Siddhi Zawar","email":"siddhizawar726@gmail.com","mock":17,"gd":20,"mini":28,"mock100":56.7,"proj100":70.0}];
+
+const EVENTS=[
+  {key:"build1",name:"Build 1",week:3,credits:3,type:"build",feeds:["M1"],lmsBy:"Mon 26 Oct 2026"},
+  {key:"exam1",name:"Exam 1",week:5,credits:2,type:"exam",max:70,feeds:["M2"],lmsBy:"Tue 10 Nov 2026"},
+  {key:"build2",name:"Build 2",week:6,credits:2,type:"build",feeds:["M2"],lmsBy:"Mon 16 Nov 2026"},
+  {key:"build3",name:"Build 3",week:9,credits:4,type:"build",feeds:["M3"],lmsBy:"Mon 07 Dec 2026"},
+  {key:"exam2",name:"Exam 2",week:10,credits:6,type:"exam",max:100,feeds:["M4","M5"],lmsBy:"Mon 14 Dec 2026"},
+  {key:"build4",name:"Build 4",week:12,credits:3,type:"build",feeds:["M6"],lmsBy:"Mon 28 Dec 2026"},
+  {key:"build5",name:"Build 5",week:15,credits:4,type:"build",feeds:["M9"],lmsBy:"Mon 18 Jan 2027"},
+  {key:"exam3",name:"Exam 3",week:16,credits:6,type:"exam",max:130,feeds:["M7","M8"],lmsBy:"Mon 25 Jan 2027"},
+  {key:"capstone",name:"Capstone",week:20,credits:3,type:"capstone",max:200,feeds:["M10"],lmsBy:"Sat 20 Feb 2027"},
+];
+const EXAMS=[{key:"exam1",name:"Exam 1",week:5},{key:"exam2",name:"Exam 2",week:10},{key:"exam3",name:"Exam 3",week:16},{key:"capstone",name:"Capstone",week:20}];
+const TOTAL_CREDITS=33, CPI_MAX=11;
+const SUBJECTS={M1:"Foundations of AI and Data",M2:"Applied Machine Learning",M3:"Deep Learning and Neural Networks",M4:"Natural Language Processing",M5:"Generative AI Foundations",M6:"Applied Generative AI",M7:"Production AI for Real-World Applications",M8:"Foundations of Agentic AI",M9:"Advanced Agentic AI and Multi-Agent Systems",M10:"Capstone Project"};
+const SCALE=[{from:90,grade:"A+",point:11},{from:80,grade:"A",point:10},{from:75,grade:"A-",point:9},{from:70,grade:"B",point:8},{from:65,grade:"B-",point:7},{from:60,grade:"C",point:6},{from:55,grade:"C-",point:5},{from:50,grade:"D",point:4},{from:40,grade:"E",point:2},{from:0,grade:"F",point:0}];
+const GRADE_COLOR={"A+":"#15724A","A":"#1C7D50","A-":"#2A8A5C","B":"#2D7E86","B-":"#3C8A8F","C":"#8C6410","C-":"#9C7416","D":"#B5641C","E":"#B23A32","F":"#9B2D28"};
+
+const round=(x,n=2)=>Math.round(x*10**n)/10**n;
+const gradeFor=p=>SCALE.find(r=>p>=r.from)||SCALE[SCALE.length-1];
+const PLACEMENT=round(7/CPI_MAX*100,2), DIPLOMA=round(6/CPI_MAX*100,2);
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const quantile=(arr,q)=>{if(!arr.length)return 0;const a=[...arr].sort((x,y)=>x-y);const pos=(a.length-1)*q;const b=Math.floor(pos);const r=pos-b;return a[b+1]!==undefined?a[b]+r*(a[b+1]-a[b]):a[b];};
+const pctBelow=(v,arr)=>arr.length?Math.round(100*arr.filter(x=>x<v).length/arr.length):0;
+const rankOf=(v,arr)=>1+arr.filter(x=>x>v).length;
+
+function eventResult(s,ev){
+  if(ev.key==="build1"){
+    if(s.mock==null||s.gd==null||s.mini==null) return {entered:false};
+    const earned=s.mock+s.gd+s.mini, pct=round(earned/100*100,2), g=gradeFor(pct);
+    return {entered:true,earned,available:100,pct,grade:g.grade,point:g.point};
+  }
+  if(ev.type==="build") return {entered:false};
+  const v=s[ev.key]; if(v==null) return {entered:false};
+  const pct=round(v/ev.max*100,2), g=gradeFor(pct);
+  return {entered:true,earned:v,available:ev.max,pct,grade:g.grade,point:g.point};
+}
+function creditState(s,uptoIdx){
+  const ent={}; let unlocked=0;
+  for(let i=0;i<=uptoIdx;i++){const r=eventResult(s,EVENTS[i]); if(r.entered){ent[EVENTS[i].key]=r; unlocked+=EVENTS[i].credits;}}
+  let cp=0,earned=0;
+  Object.keys(ent).forEach(k=>{const ev=EVENTS.find(e=>e.key===k),r=ent[k]; cp+=r.point*ev.credits; if(r.point>=4) earned+=ev.credits;});
+  return {cp,earned,unlocked};
+}
+function sumMarks(s,uptoIdx){let e=0,a=0;for(let i=0;i<=uptoIdx;i++){const r=eventResult(s,EVENTS[i]);if(r.entered){e+=r.earned;a+=r.available;}}return{e,a};}
+// cumulative build-only and exam-only marks up to idx
+function partialMarks(s,uptoIdx,kind){let e=0,a=0;for(let i=0;i<=uptoIdx;i++){const ev=EVENTS[i];const r=eventResult(s,ev);if(!r.entered)continue;if(kind==="build"&&ev.type==="build"){e+=r.earned;a+=r.available;}if(kind==="exam"&&(ev.type==="exam"||ev.type==="capstone")){e+=r.earned;a+=r.available;}}return a?round(e/a*100,1):null;}
+
+function compute(s,cutoff){
+  const rows=EVENTS.map((ev,i)=>{const r=eventResult(s,ev);return {ev,i,...r};});
+  const upto=cutoff;
+  const st=creditState(s,upto);
+  const m=sumMarks(s,upto);
+  const b1=eventResult(s,EVENTS[0]);
+  // measures
+  const share=st.unlocked?round(st.cp/(CPI_MAX*st.unlocked)*100,2):null;
+  const marksPct=m.a?round(m.e/m.a*100,1):null;
+  const buildPct=partialMarks(s,upto,"build");
+  const examPct=partialMarks(s,upto,"exam");
+  // pending = events <= cutoff lacking a grade
+  let pending=0; for(let i=0;i<=upto;i++){ if(!eventResult(s,EVENTS[i]).entered) pending++; }
+  // share at the previous entered event (for delta)
+  let prevShare=null;
+  for(let i=upto-1;i>=0;i--){ if(eventResult(s,EVENTS[i]).entered){ const ps=creditState(s,i); prevShare=ps.unlocked?round(ps.cp/(CPI_MAX*ps.unlocked)*100,2):null; break; } }
+  return {
+    raw:s, rows, cutoff:upto, complete:b1.entered, selEvent:rows[upto], prevShare,
+    cpiEarned: round(st.cp/TOTAL_CREDITS,2),
+    cpiUnlocked: round(CPI_MAX*st.unlocked/TOTAL_CREDITS,2),
+    creditsEarned: st.earned, creditsUnlocked: st.unlocked, creditPoints: st.cp,
+    marksEarned: m.e, marksAvail: m.a, share, marksPct, buildPct, examPct, pending,
+    compPct:{mock:s.mock!=null?round(s.mock/30*100,1):null, gd:s.gd!=null?round(s.gd/30*100,1):null, mini:s.mini!=null?round(s.mini/40*100,1):null},
+  };
+}
+
+/* ---------- small UI ---------- */
+const Chip=({g})=> g? <span className="chip" style={{background:GRADE_COLOR[g]}}>{g}</span> : <span className="notfilled">—</span>;
+const pctColor=p=> p==null?"var(--muted)": p<40?"var(--red)": p<70?"var(--amber)":"var(--green)";
+const pctPillCls=p=> p==null?"":p<40?"b-red":p<70?"b-amber":"b-green";
+
+function StatCard({label,value,unit,color,meta,badge,badgeCls}){
+  return (
+    <div className="card pad">
+      <div className="lbl">{label}</div>
+      <div className={"statnum "+(color||"")}>{value}{unit&&<small> {unit}</small>}</div>
+      <div className="statmeta">{meta}</div>
+      {badge && <span className={"badge "+badgeCls}>{badge}</span>}
+    </div>
+  );
+}
+
+/* ---------- beeswarm ---------- */
+function Swarm({values, selKey, maxVal=100, onPick}){
+  const W=1000,H=250, padL=28,padR=28, base=192, R=7, GAP=2.5;
+  const x=v=>padL+(v/maxVal)*(W-padL-padR);
+  const vals=values.map(d=>({...d})).filter(d=>d.v!=null);
+  const q={p25:quantile(vals.map(d=>d.v),.25),p50:quantile(vals.map(d=>d.v),.5),p75:quantile(vals.map(d=>d.v),.75),p90:quantile(vals.map(d=>d.v),.9)};
+  const sorted=[...vals].sort((a,b)=>a.v-b.v); const placed=[];
+  const minDx=R*2+GAP;
+  sorted.forEach(d=>{let lvl=0;while(placed.some(p=>p.level===lvl&&Math.abs(x(p.v)-x(d.v))<minDx)){lvl++;if(lvl>80)break;} d.level=lvl; placed.push(d);});
+  const sel=vals.find(d=>d.key===selKey);
+  const ticks=[0,.2,.4,.6,.8,1].map(f=>round(f*maxVal,0));
+  const lines=[{v:q.p25,l:"P25"},{v:q.p50,l:"median"},{v:q.p75,l:"P75"},{v:q.p90,l:"P90"}];
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}} role="img" aria-label="Class distribution for the selected event">
+      {lines.map((ln,i)=>(
+        <g key={i}>
+          <line x1={x(ln.v)} x2={x(ln.v)} y1={28} y2={base} stroke="var(--border)" strokeWidth={ln.l==="median"?2:1.4} strokeDasharray={ln.l==="median"?"":"5 5"}/>
+          <text x={x(ln.v)} y={ln.l==="median"?base+22:22} textAnchor="middle" fontSize="13" fill="var(--muted)">{ln.l==="median"?"median":ln.l}</text>
+          {ln.l!=="median" && <text x={x(ln.v)} y={38} textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--ink)">{round(ln.v,1)}</text>}
+        </g>
+      ))}
+      <line x1={padL} x2={W-padR} y1={base} y2={base} stroke="var(--faint)" strokeWidth="1"/>
+      {ticks.map(t=><text key={t} x={x(t)} y={base+22} textAnchor="middle" fontSize="13" fill="var(--faint)">{t}</text>)}
+      <text x={W-padR} y={base+22} textAnchor="end" fontSize="12" fill="var(--faint)">out of {maxVal}</text>
+      {placed.map((d,i)=> d.key!==selKey && (
+        <circle key={i} cx={x(d.v)} cy={base-R-d.level*(R*2+GAP)} r={R} fill="var(--green)" opacity="0.3"
+          style={{cursor:onPick?"pointer":"default"}} onClick={onPick?()=>onPick(d.key):undefined}><title>{d.name||""}</title></circle>
+      ))}
+      {sel && <circle cx={x(sel.v)} cy={base-R-sel.level*(R*2+GAP)} r={R+4} fill="var(--purple)"
+        style={{cursor:onPick?"pointer":"default"}} onClick={onPick?()=>onPick(sel.key):undefined}><title>{sel.name||""}</title></circle>}
+    </svg>
+  );
+}
+
+/* ---------- sparkline + status ---------- */
+const DEFAULT_CFG={placement:PLACEMENT, diploma:DIPLOMA, comfort:70, trend:3};
+function statusOf(share, cfg){ const c=cfg||DEFAULT_CFG; if(share==null) return null;
+  if(share>=c.comfort) return "Comfortable"; if(share>=c.placement) return "Near the 7.00 line";
+  if(share>=c.diploma) return "Below the 7.00 line"; return "Below the 6.00 line"; }
+function statusCls(st){ return st==="Comfortable"?"b-green": st==="Below the 6.00 line"?"b-red":"b-amber"; }
+function Sparkline({pts, color}){
+  const vals=pts.filter(v=>v!=null); if(vals.length<1) return <span className="notfilled">—</span>;
+  const W=70,H=22,pad=3; const lo=Math.min(...vals), hi=Math.max(...vals), span=hi-lo||1;
+  const xs=pts.map((v,i)=>pad+(pts.length>1?i/(pts.length-1):0)*(W-2*pad));
+  const y=v=>H-pad-((v-lo)/span)*(H-2*pad);
+  let d="",started=false,lastX=0,lastY=0;
+  pts.forEach((v,i)=>{ if(v==null) return; const px=xs[i],py=y(v); d+=(started?" L":"M")+px+" "+py; started=true; lastX=px; lastY=py; });
+  return (<svg width={W} height={H} style={{overflow:"visible"}}>{started&&<path d={d} fill="none" stroke={color||"var(--green)"} strokeWidth="1.8"/>}{started&&<circle cx={lastX} cy={lastY} r="2.6" fill={color||"var(--green)"}/>}</svg>);
+}
+
+/* ---------- percentile standing bar ---------- */
+function PBar({name, value, arr}){
+  if(value==null) return (
+    <div className="ps-row">
+      <div className="ps-head"><span className="ps-name">{name}</span><span className="notfilled">—</span></div>
+      <div className="ps-bar"></div>
+      <div className="ps-grad" style={{opacity:.4}}></div>
+      <div className="ps-glabels">{[["P25",.25],["P50",.5],["P75",.75],["P90",.9]].map(([l],i)=><span key={i} className="ps-glabel" style={{left:(25+i*25)+"%"}}><b>—</b>{l}</span>)}</div>
+    </div>
+  );
+  const p=pctBelow(value,arr);
+  const col=pctColor(p);
+  const q=[["P25",quantile(arr,.25)],["P50",quantile(arr,.5)],["P75",quantile(arr,.75)],["P90",quantile(arr,.9)]];
+  return (
+    <div className="ps-row">
+      <div className="ps-head">
+        <span className="ps-name">{name}</span>
+        <span><span className="ps-val tnum" style={{color:col}}>{value.toFixed(1)}%</span><span className={"ps-pill "+pctPillCls(p)}>{"P"+p}</span></span>
+      </div>
+      <div className="ps-bar">
+        <div className="ps-fill" style={{width:Math.min(100,value)+"%",background:col}}/>
+        <div className="ps-ticks">{q.map(([l,v],i)=><div key={i} className="ps-tick" style={{left:Math.min(100,v)+"%"}}/>)}</div>
+        <div className="ps-knob" style={{left:Math.min(100,value)+"%",color:col}}/>
+      </div>
+      <div className="ps-grad">{q.map(([l,v],i)=><div key={i} className="ps-gtick" style={{left:Math.min(100,v)+"%"}}/>)}</div>
+      <div className="ps-glabels">{q.map(([l,v],i)=><span key={i} className="ps-glabel" style={{left:Math.min(100,v)+"%"}}><b className="tnum">{round(v,1)}</b>{l}</span>)}</div>
+    </div>
+  );
+}
+
+/* ---------- Student Overview ---------- */
+function StudentOverview({all, sel, setSel, cutoff, setCutoff, cfg}){
+  const me=all.find(a=>a.raw.roll===sel);
+  const graded=all.filter(a=>a.complete);
+  const n=graded.length;
+  const arr={
+    cpi:graded.map(a=>a.cpiEarned), share:graded.map(a=>a.share), marks:graded.map(a=>a.marksPct),
+    build:graded.map(a=>a.buildPct).filter(v=>v!=null), credits:graded.map(a=>a.creditsEarned),
+    mock:graded.map(a=>a.compPct.mock), gd:graded.map(a=>a.compPct.gd), mini:graded.map(a=>a.compPct.mini),
+    b1pct:graded.map(a=>a.rows[0].pct),
+  };
+  const avg={cpi:round(mean(arr.cpi),2),share:round(mean(arr.share),2),marks:round(mean(arr.marks),1),credits:round(mean(arr.credits),1),
+    mock:round(mean(arr.mock),1),gd:round(mean(arr.gd),1),mini:round(mean(arr.mini),1),build:round(mean(arr.build),1)};
+  const cutEv=EVENTS[cutoff];
+
+  if(!me.complete){
+    return (
+      <>
+        <Pickers all={all} sel={sel} setSel={setSel} cutoff={cutoff} setCutoff={setCutoff}/>
+        <div className="card pad" style={{marginTop:16}}>
+          <h2 className="panel-title">Build 1 isn’t complete for {me.raw.name}</h2>
+          <p className="section-note" style={{marginTop:8}}>The mock interview mark hasn’t been recorded, so this learner can’t be placed against the class yet.
+          Group discussion ({me.raw.gd}/30) and project presentation ({me.raw.mini}/40) are in — add the mock interview to complete the event.</p>
+        </div>
+      </>
+    );
+  }
+  const cpiP=pctBelow(me.cpiEarned,arr.cpi), marksP=pctBelow(me.marksPct,arr.marks), b1P=pctBelow(me.rows[0].pct,arr.b1pct);
+  const cpiRank=rankOf(me.cpiEarned,arr.cpi), marksRank=rankOf(me.marksPct,arr.marks), b1Rank=rankOf(me.rows[0].pct,arr.b1pct);
+
+  return (
+    <>
+      <Pickers all={all} sel={sel} setSel={setSel} cutoff={cutoff} setCutoff={setCutoff}/>
+
+      <div className="statrow">
+        <StatCard label="CPI earned" value={me.cpiEarned.toFixed(2)} unit={"/ "+me.cpiUnlocked.toFixed(2)} color="c-purple"
+          meta={"possible so far · class avg "+avg.cpi.toFixed(2)} badge={"P"+cpiP+" · rank "+cpiRank+"/"+n} badgeCls={pctPillCls(cpiP)}/>
+        <StatCard label="Share of unlocked CPI" value={me.share.toFixed(2)+"%"} color="c-ink"
+          meta={"class avg "+avg.share.toFixed(2)+"% · lines "+cfg.placement+" / "+cfg.diploma}
+          badge={statusOf(me.share,cfg)} badgeCls={statusCls(statusOf(me.share,cfg))}/>
+        <StatCard label="Credits earned" value={me.creditsEarned} unit={"/ "+me.creditsUnlocked} color="c-green"
+          meta={"possible so far · "+TOTAL_CREDITS+" in all · class avg "+avg.credits.toFixed(1)}
+          badge={me.creditsEarned>=me.creditsUnlocked?"No backlog":"Backlog"} badgeCls={me.creditsEarned>=me.creditsUnlocked?"b-green":"b-red"}/>
+        <StatCard label="Marks so far" value={me.marksPct.toFixed(1)+"%"} color="c-blue"
+          meta={me.marksEarned+" of "+me.marksAvail+" marks · class avg "+avg.marks.toFixed(1)+"%"}
+          badge={"P"+marksP+" · rank "+marksRank+"/"+n} badgeCls={pctPillCls(marksP)}/>
+        <StatCard label="Pending events" value={me.pending} color="c-ink" meta={me.pending===0?"all marks in":"awaiting marks"}/>
+      </div>
+
+      <div className="card pad">
+        <h2 className="panel-title">Where {me.raw.name.split(" ")[0]} stands — {cutEv.name}</h2>
+        <p className="panel-sub">Position in the class on this event, out of 100. Dashed lines are the class percentiles.</p>
+        <div className="swarm-wrap">
+          <Swarm values={graded.map(a=>({key:a.raw.roll,v:a.rows[0].pct}))} selKey={sel}/>
+        </div>
+        <div className="swarm-foot">
+          <div>
+            <div style={{fontWeight:600,color:"var(--head)"}}>{me.raw.name}</div>
+            <div className="statmeta" style={{marginTop:3}}>
+              <b className="tnum">{me.rows[0].earned}/100</b> · {me.rows[0].pct.toFixed(1)}% · <Chip g={me.rows[0].grade}/> &nbsp;
+              <span className="badge b-amber" style={{marginTop:0}}>{"P"+b1P}</span> &nbsp; scored above {b1P}% of the class
+            </div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div className="big tnum">{b1Rank}<span style={{fontSize:14,color:"var(--muted)"}}> / {n}</span></div>
+            <div className="statmeta">position on {cutEv.name}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pgrid">
+        {/* percentile standing */}
+        <div className="card pad">
+          <h3 className="panel-title">Percentile standing</h3>
+          <p className="panel-sub">Share of unlocked CPI · marks so far · build work · major exams — against the class.</p>
+          <div className="pstand">
+            <PBar name="Share of unlocked CPI" value={me.share} arr={arr.share}/>
+            <PBar name="Marks so far" value={me.marksPct} arr={arr.marks}/>
+            <PBar name="Build work: mock, GD, mini-project" value={me.buildPct} arr={arr.build}/>
+            <PBar name="Major exams: ME1 to ME3" value={me.examPct} arr={arr.build.length?graded.map(a=>a.examPct).filter(v=>v!=null):[]}/>
+          </div>
+        </div>
+
+        {/* major exam scores */}
+        <div className="card pad">
+          <h3 className="panel-title">Major exam scores</h3>
+          <div className="examgrid">
+            {EXAMS.map(ex=>{
+              const r=me.rows.find(x=>x.ev.key===ex.key);
+              return (
+                <div className="examc" key={ex.key}>
+                  <div className="en">{ex.name}</div>
+                  <div className="ev">{r&&r.entered? r.pct.toFixed(0)+"%":"—"}</div>
+                  <div className="es">{r&&r.entered? r.earned+" / "+r.ev.max : "not yet · wk "+ex.week}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <h3 className="panel-title" style={{marginTop:22}}>Component trend</h3>
+          <p className="panel-sub">Each component in %, event by event. Up or Down once there are enough events to compare.</p>
+          <div className="tbl-wrap">
+            <table>
+              <thead><tr><th>Component</th><th className="n">This event</th><th className="n">vs last</th><th className="n">vs last 3</th><th>Direction</th></tr></thead>
+              <tbody>
+                {[["Mock interview",me.compPct.mock],["Group discussion",me.compPct.gd],["Mini-project",me.compPct.mini],["Major exams",me.examPct]].map(([lab,v],i)=>(
+                  <tr key={i}><td style={{fontWeight:600,color:"var(--head)"}}>{lab}</td>
+                    <td className="n tnum">{v!=null? v.toFixed(1):"—"}</td><td className="n">—</td><td className="n">—</td><td className="notfilled">—</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="section-note" style={{marginTop:8}}>Trend needs at least two graded events; it fills in from Exam 1 onward.</p>
+        </div>
+
+        {/* component comparison */}
+        <div className="card pad">
+          <h3 className="panel-title">Component comparison</h3>
+          <p className="panel-sub">Percent so far in each component, against the class average.</p>
+          <div className="tbl-wrap">
+            <table>
+              <thead><tr><th>Component</th><th className="n">Learner %</th><th className="n">Class</th><th>Gap</th><th className="n">Percentile</th></tr></thead>
+              <tbody>
+                {[["Mock interview",me.compPct.mock,avg.mock,arr.mock],["Group discussion",me.compPct.gd,avg.gd,arr.gd],["Mini-project",me.compPct.mini,avg.mini,arr.mini]].map(([lab,v,cl,ar],i)=>{
+                  const gap=round(v-cl,1), p=pctBelow(v,ar);
+                  return (<tr key={i}>
+                    <td style={{fontWeight:600,color:"var(--head)"}}>{lab}</td>
+                    <td className="n tnum" style={{fontWeight:700}}>{v.toFixed(1)}</td>
+                    <td className="n tnum" style={{color:"var(--muted)"}}>{cl.toFixed(1)}</td>
+                    <td><span className={gap>=0?"gap-pos":"gap-neg"}>{gap>=0?"+":""}{gap.toFixed(1)}</span></td>
+                    <td className="n ppill">{"P"+p}</td>
+                  </tr>);
+                })}
+                {[["Exam 1"],["Exam 2"],["Exam 3"]].map((x,i)=>(
+                  <tr key={"e"+i} className="off"><td>{x[0]}</td><td className="n notfilled" colSpan="4">not yet</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* event by event */}
+        <div className="card pad">
+          <h3 className="panel-title">Event by event</h3>
+          <p className="panel-sub">Grade, class average and running credits/CPI after each event. The highlighted row is the event you picked.</p>
+          <div className="tbl-wrap">
+            <table>
+              <thead><tr><th>Event</th><th className="n">Marks</th><th>Grade</th><th className="n">Class %</th><th>Gap</th><th className="n">Credits</th><th className="n">CPI</th></tr></thead>
+              <tbody>
+                {me.rows.map((r,i)=>{
+                  if(!r.entered) return (<tr key={i} className="off"><td><span className="rowdot"/>{r.ev.name}</td><td className="n notfilled" colSpan="6">not yet</td></tr>);
+                  const classAvg=round(mean(graded.map(a=>a.rows[i].pct)),1);
+                  const gap=round(r.pct-classAvg,1);
+                  const cs=creditState(r.ev.key==="build1"?me.raw:me.raw,i);
+                  return (<tr key={i} className={i===cutoff?"sel":""}>
+                    <td><span className={"rowdot"+(i===cutoff?" on":"")}/><b style={{color:"var(--head)"}}>{r.ev.name}</b></td>
+                    <td className="n tnum">{r.earned}/{r.available}</td>
+                    <td><Chip g={r.grade}/></td>
+                    <td className="n tnum" style={{color:"var(--muted)"}}>{classAvg.toFixed(1)}</td>
+                    <td><span className={gap>=0?"gap-pos":"gap-neg"}>{gap>=0?"+":""}{gap.toFixed(1)}</span></td>
+                    <td className="n tnum">{cs.earned}/{cs.unlocked}</td>
+                    <td className="n tnum c-purple" style={{fontWeight:700}}>{round(cs.cp/TOTAL_CREDITS,2).toFixed(2)}</td>
+                  </tr>);
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Pickers({all, sel, setSel, cutoff, setCutoff}){
+  return (
+    <div className="controls">
+      <select value={sel} onChange={e=>setSel(Number(e.target.value))} aria-label="Learner">
+        {all.map(a=><option key={a.raw.roll} value={a.raw.roll}>{a.raw.name}</option>)}
+      </select>
+      <select value={cutoff} onChange={e=>setCutoff(Number(e.target.value))} aria-label="Event">
+        {EVENTS.map((ev,i)=><option key={ev.key} value={i} disabled={ev.key!=="build1"}>{ev.name} · Week {ev.week}{ev.key!=="build1"?" (no marks yet)":""}</option>)}
+      </select>
+    </div>
+  );
+}
+
+/* ---------- Class Overview ---------- */
+const evColor=ev=> ev.type==="exam"?"#7C3AED": ev.type==="capstone"?"#16A34A":"#2D7E86";
+function ClassOverview({all, cutoff, setCutoff, openStudent, cfg}){
+  const [sort,setSort]=useState("cpi-desc");
+  const [stat,setStat]=useState("All");
+  const [showComp,setShowComp]=useState(false);
+  const graded=all.filter(a=>a.complete), n=graded.length;
+  const incomplete=all.filter(a=>!a.complete);
+  const cutEv=EVENTS[cutoff];
+  const cpis=graded.map(a=>a.cpiEarned), shares=graded.map(a=>a.share), marks=graded.map(a=>a.marksPct);
+  const count={Comfortable:0,"Near the 7.00 line":0,"Below the 7.00 line":0,"Below the 6.00 line":0};
+  graded.forEach(a=>count[statusOf(a.share,cfg)]++);
+  const below6backlog=graded.filter(a=>statusOf(a.share,cfg)==="Below the 6.00 line"&&a.creditsEarned<a.creditsUnlocked).length;
+  const maxV=cutEv.type==="build"?100:cutEv.max;
+  const evRows=graded.map(a=>a.selEvent).filter(r=>r&&r.entered);
+  const evPcts=evRows.map(r=>r.pct), evN=evRows.length;
+
+  const sorters={"cpi-desc":(a,b)=>b.cpiEarned-a.cpiEarned,"cpi-asc":(a,b)=>a.cpiEarned-b.cpiEarned,
+    "share-desc":(a,b)=>b.share-a.share,"marks-desc":(a,b)=>b.marksPct-a.marksPct,"name":(a,b)=>a.raw.name.localeCompare(b.raw.name)};
+  let rows=[...graded];
+  if(stat!=="All") rows=rows.filter(a=>statusOf(a.share,cfg)===stat);
+  rows.sort(sorters[sort]);
+
+  const buildWeeks=[["build1",3],["build2",6],["build3",9],["build4",12],["build5",15]];
+  const examWeeks=[["exam1",5],["exam2",10],["exam3",16],["capstone",20]];
+  const weekCols=[3,5,6,9,10,12,15,16,20];
+  const compMean=(key)=> { const a=graded.map(x=>x.compPct[key]).filter(v=>v!=null); return a.length?round(mean(a),1):null; };
+  // component value per week (only Build 1 / W3 has component data in this dataset)
+  const compByWeek=(key)=> weekCols.map(w=> w===3 ? compMean(key) : null);
+  const examByWeek=()=> weekCols.map(()=>null); // no exam data yet
+  const trendRows=[["Mock interview",compByWeek("mock"),"#2D7E86"],["Group discussion",compByWeek("gd"),"#2D7E86"],
+    ["Mini-project",compByWeek("mini"),"#2D7E86"],["Major exams",examByWeek(),"#7C3AED"]];
+  const vsLast=(pts)=>{const v=pts.filter(x=>x!=null); if(v.length<2) return null; return round(v[v.length-1]-v[v.length-2],1);};
+
+  return (
+    <>
+      <div className="pagehead"><h1>Class <em>overview</em></h1><p>Full roster · CPI and share of unlocked CPI · status against the 7.00 and 6.00 lines · event results · component trends.</p></div>
+      <div className="controls">
+        <label className="lbl" style={{alignSelf:"center"}}>Up to event</label>
+        <select value={cutoff} onChange={e=>setCutoff(Number(e.target.value))} aria-label="Up to event">
+          {EVENTS.map((ev,i)=><option key={ev.key} value={i} disabled={ev.key!=="build1"}>{ev.name} · Week {ev.week}{ev.key==="build1"?" (latest)":" (no marks yet)"}</option>)}
+        </select>
+      </div>
+
+      <div className="statrow">
+        <StatCard label="Avg CPI earned" value={round(mean(cpis),2).toFixed(2)} color="c-purple"
+          meta={"of "+graded[0].cpiUnlocked.toFixed(2)+" unlocked · high "+Math.max(...cpis).toFixed(2)+" · low "+Math.min(...cpis).toFixed(2)}/>
+        <StatCard label="Avg share" value={round(mean(shares),2)+"%"} color="c-ink" meta={"median "+round(quantile(shares,.5),2)+"%"}/>
+        <StatCard label="Avg marks so far" value={round(mean(marks),1)+"%"} color="c-blue"
+          meta={round(mean(graded.map(a=>a.marksEarned)))+" of "+round(mean(graded.map(a=>a.marksAvail)))+" · credits "+round(mean(graded.map(a=>a.creditsEarned)),1)+"/"+TOTAL_CREDITS}/>
+        <StatCard label="Comfortable" value={count.Comfortable} color="c-green"
+          meta={"near 7.00: "+count["Near the 7.00 line"]+" · below 7.00: "+count["Below the 7.00 line"]}/>
+        <StatCard label="Below 6.00 line" value={count["Below the 6.00 line"]} color="c-red"
+          meta={"with a backlog: "+below6backlog}/>
+      </div>
+
+      <div className="card pad">
+        <div className="controls" style={{margin:"0 0 6px",alignItems:"center"}}>
+          <label className="lbl" style={{alignSelf:"center"}}>Sort</label>
+          <select value={sort} onChange={e=>setSort(e.target.value)} style={{minWidth:170}}>
+            <option value="cpi-desc">CPI high → low</option><option value="cpi-asc">CPI low → high</option>
+            <option value="share-desc">Share high → low</option><option value="marks-desc">Marks high → low</option><option value="name">Name A → Z</option>
+          </select>
+          <label className="lbl" style={{alignSelf:"center",marginLeft:8}}>Status</label>
+          <select value={stat} onChange={e=>setStat(e.target.value)} style={{minWidth:170}}>
+            <option>All</option><option>Comfortable</option><option>Near the 7.00 line</option><option>Below the 7.00 line</option><option>Below the 6.00 line</option>
+          </select>
+          <label style={{display:"flex",gap:7,alignItems:"center",fontSize:13,color:"var(--ink)",marginLeft:8,cursor:"pointer"}}>
+            <input type="checkbox" checked={showComp} onChange={e=>setShowComp(e.target.checked)}/> Show components
+          </label>
+          <span style={{marginLeft:"auto",color:"var(--muted)",fontSize:13}}>{rows.length} of {n} graded{incomplete.length?" · "+incomplete.length+" incomplete":""}</span>
+        </div>
+        <div className="tbl-wrap">
+          <table style={{minWidth:showComp?900:720}}>
+            <thead><tr>
+              <th>#</th><th>Name</th><th className="n">CPI</th><th className="n">Share %</th><th>Status</th><th className="n">Credits</th>
+              <th className="n">Marks %</th><th className="n">{cutEv.name} %</th>
+              {showComp && <><th className="n">Mock</th><th className="n">GD</th><th className="n">Mini</th></>}
+              <th className="n">Δ Share</th><th className="n">Pct</th>
+            </tr></thead>
+            <tbody>
+              {rows.map((a,i)=>{
+                const st=statusOf(a.share,cfg); const d=a.prevShare!=null?round(a.share-a.prevShare,2):null;
+                return (
+                  <tr key={a.raw.roll} onClick={()=>openStudent(a.raw.roll)} style={{cursor:"pointer"}}>
+                    <td className="tnum" style={{color:"var(--muted)"}}>{i+1}</td>
+                    <td style={{fontWeight:600,color:"var(--head)"}}>{a.raw.name}</td>
+                    <td className="n tnum c-purple" style={{fontWeight:700}}>{a.cpiEarned.toFixed(2)}</td>
+                    <td className="n tnum">{a.share.toFixed(2)}</td>
+                    <td><span className={"badge "+statusCls(st)} style={{marginTop:0}}>{st}</span></td>
+                    <td className="n tnum" style={{color:a.creditsEarned<a.creditsUnlocked?"var(--amber)":"var(--green-ink)",fontWeight:600}}>{a.creditsEarned}/{a.creditsUnlocked}</td>
+                    <td className="n tnum">{a.marksPct.toFixed(1)}</td>
+                    <td className="n tnum">{a.selEvent&&a.selEvent.entered?a.selEvent.pct.toFixed(1):"—"}</td>
+                    {showComp && <><td className="n tnum">{a.compPct.mock!=null?a.compPct.mock.toFixed(0):"—"}</td><td className="n tnum">{a.compPct.gd!=null?a.compPct.gd.toFixed(0):"—"}</td><td className="n tnum">{a.compPct.mini!=null?a.compPct.mini.toFixed(0):"—"}</td></>}
+                    <td className="n">{d==null?<span className="notfilled">—</span>:<span className={d>=0?"gap-pos":"gap-neg"}>{d>=0?"+":""}{d.toFixed(2)}</span>}</td>
+                    <td className="n ppill">{"P"+pctBelow(a.cpiEarned,cpis)}</td>
+                  </tr>
+                );
+              })}
+              {stat==="All" && incomplete.map(a=>(
+                <tr key={a.raw.roll} className="off"><td>—</td><td>{a.raw.name}</td><td className="notfilled" colSpan={showComp?11:8}>Build 1 incomplete — mock interview not recorded</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="section-note" style={{marginTop:10}}>Select a learner to open their Student Overview at the same event. Percentile is on CPI earned.</p>
+      </div>
+
+      <div className="pgrid">
+        <div className="card pad">
+          <h3 className="panel-title">Where everyone stands — after {cutEv.name}</h3>
+          <p className="panel-sub">Each dot is a learner on {cutEv.name}, out of {maxV}. Dashed lines are the class percentiles. Tap a dot to open that learner.</p>
+          <Swarm values={graded.map(a=>({key:a.raw.roll,v:a.selEvent&&a.selEvent.entered?a.selEvent.earned:null,name:a.raw.name}))} selKey={null} maxVal={maxV} onPick={openStudent}/>
+        </div>
+        <div className="card pad">
+          <h3 className="panel-title">{cutEv.name}: the class result</h3>
+          <p className="panel-sub">Week {cutEv.week} · out of {maxV} · {cutEv.credits} credits · {evN} learners with marks.</p>
+          <div className="examgrid" style={{gridTemplateColumns:"1fr 1fr"}}>
+            <div className="examc"><div className="en">Average</div><div className="ev">{evN?round(mean(evPcts),1)+"%":"—"}</div></div>
+            <div className="examc"><div className="en">Median</div><div className="ev">{evN?round(quantile(evPcts,.5),1)+"%":"—"}</div></div>
+            <div className="examc"><div className="en">Highest · lowest</div><div className="ev" style={{fontSize:18}}>{evN?Math.max(...evPcts).toFixed(1)+" · "+Math.min(...evPcts).toFixed(1):"—"}</div></div>
+            <div className="examc"><div className="en">Below 50%</div><div className="ev">{evN?evPcts.filter(p=>p<50).length+" of "+evN:"—"}</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card pad" style={{marginTop:16}}>
+        <h3 className="panel-title">Each event so far — class or learner?</h3>
+        <p className="panel-sub">A low class average means the whole class struggled with that event.</p>
+        <div className="tbl-wrap">
+          <table style={{minWidth:760}}>
+            <thead><tr><th>Event</th><th className="n">Week</th><th className="n">Out of</th><th className="n">Credits</th><th className="n">Class avg %</th><th className="n">Median %</th><th className="n">Highest %</th><th className="n">Lowest %</th><th className="n">Below 50%</th></tr></thead>
+            <tbody>
+              {EVENTS.map((ev,i)=>{
+                const vals=graded.map(a=>a.rows[i]).filter(r=>r&&r.entered).map(r=>r.pct);
+                const has=vals.length>0, mx=ev.type==="build"?100:ev.max;
+                return (
+                  <tr key={ev.key} className={has?"":"off"}>
+                    <td><span className="rowdot" style={{background:evColor(ev)}}/><b style={{color:has?"var(--head)":"inherit"}}>{ev.name}</b></td>
+                    <td className="n tnum">{ev.week}</td><td className="n tnum">{mx}</td><td className="n tnum">{ev.credits}</td>
+                    {has?<>
+                      <td className="n tnum" style={{fontWeight:700}}>{round(mean(vals),1)}</td>
+                      <td className="n tnum">{round(quantile(vals,.5),1)}</td>
+                      <td className="n tnum">{Math.max(...vals).toFixed(1)}</td>
+                      <td className="n tnum">{Math.min(...vals).toFixed(1)}</td>
+                      <td className="n tnum" style={{color:vals.filter(p=>p<50).length?"var(--red)":"var(--muted)"}}>{vals.filter(p=>p<50).length}</td>
+                    </>:<td className="notfilled" colSpan="5">not yet</td>}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="card pad" style={{marginTop:16}}>
+        <h3 className="panel-title">Class averages by component</h3>
+        <p className="panel-sub">Class average % per component at each event. Up/Down when the latest is ≥ 3 points from the one before; otherwise Steady.</p>
+        <div className="tbl-wrap">
+          <table style={{minWidth:900}}>
+            <thead><tr><th>Component</th>{weekCols.map(w=><th key={w} className="n">W{w}</th>)}<th>Trend</th><th className="n">vs last</th><th>Direction</th></tr></thead>
+            <tbody>
+              {trendRows.map(([lab,pts,col],i)=>{
+                const d=vsLast(pts); const dir=d==null?null:(Math.abs(d)>=cfg.trend?(d>0?"Up":"Down"):"Steady");
+                return (
+                  <tr key={i}>
+                    <td style={{fontWeight:600,color:"var(--head)"}}>{lab}</td>
+                    {pts.map((v,j)=><td key={j} className="n tnum" style={{color:v==null?"var(--faint)":"var(--ink)"}}>{v==null?"":v.toFixed(1)}</td>)}
+                    <td><Sparkline pts={pts} color={col}/></td>
+                    <td className="n">{d==null?<span className="notfilled">—</span>:<span className={d>=0?"gap-pos":"gap-neg"}>{d>=0?"+":""}{d.toFixed(1)}</span>}</td>
+                    <td>{dir==null?<span className="notfilled">—</span>:<span className="ppill">{dir}</span>}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="section-note" style={{marginTop:8}}>Only Build 1 (Week 3) has component marks so far, so the trend fills in from Build 2 and the exams onward.</p>
+      </div>
+    </>
+  );
+}
+
+/* ---------- Settings ---------- */
+function Settings({cfg, setCfg, cutoff, setCutoff, total, graded}){
+  const [draft,setDraft]=useState(cfg);
+  const [saved,setSaved]=useState(false);
+  useEffect(()=>setDraft(cfg),[cfg]);
+  const cutEv=EVENTS[cutoff];
+  const num=(k,v)=>{setDraft(d=>({...d,[k]:v})); setSaved(false);};
+  const save=()=>{ const c={placement:+draft.placement||PLACEMENT,diploma:+draft.diploma||DIPLOMA,comfort:+draft.comfort||70,trend:+draft.trend||3};
+    setCfg(c); setSaved(true); setTimeout(()=>setSaved(false),1800); };
+  // cumulative credits + max CPI per event
+  let cum=0; const evRows=EVENTS.map(ev=>{ cum+=ev.credits; return {ev,cum,maxCpi:round(CPI_MAX*cum/TOTAL_CREDITS,2)}; });
+  return (
+    <>
+      <div className="pagehead"><h1>Settings <em>&amp; definitions</em></h1><p>The lines, the trend band, and what students see — plus the event schedule this panel grades against.</p></div>
+      <div className="settings-grid">
+        <div>
+          <div className="card pad">
+            <div className="lbl">Data source</div>
+            <div style={{marginTop:10}}>
+              <div className="kv"><span className="k">Data source</span><span className="v">Live data · LMS Wk 0–3</span></div>
+              <div className="kv"><span className="k">Publish mode</span><span className="v">Manual: set below</span></div>
+            </div>
+          </div>
+
+          <div className="card pad" style={{marginTop:16}}>
+            <div className="lbl">Currently published</div>
+            <div className="bignow">{cutEv.name} · Week {cutEv.week}</div>
+            <div className="statmeta">{cutoff+1} of {EVENTS.length} events · students see results up to this event</div>
+          </div>
+
+          <div className="card pad" style={{marginTop:16}}>
+            <div className="lbl">Lines and trend band</div>
+            <p className="panel-sub" style={{marginTop:8}}>The 7.00 and 6.00 lines are CPI 7 and 6 as a share of the CPI unlocked (7 ÷ 11, 6 ÷ 11). Changing a value updates every status and direction.</p>
+            <div className="field2" style={{marginTop:14}}>
+              <div><label>7.00 line (placement), %</label><input type="number" step="0.01" value={draft.placement} onChange={e=>num("placement",e.target.value)}/><div className="hint">Default {PLACEMENT}</div></div>
+              <div><label>6.00 line (diploma), %</label><input type="number" step="0.01" value={draft.diploma} onChange={e=>num("diploma",e.target.value)}/><div className="hint">Default {DIPLOMA}</div></div>
+            </div>
+            <div className="field2">
+              <div><label>Comfort buffer, %</label><input type="number" step="1" value={draft.comfort} onChange={e=>num("comfort",e.target.value)}/><div className="hint">Proposed 70 · early warning only</div></div>
+              <div><label>Trend band, ± points</label><input type="number" step="1" value={draft.trend} onChange={e=>num("trend",e.target.value)}/><div className="hint">Proposed 3 · smaller moves are Steady</div></div>
+            </div>
+            <div className="field">
+              <label>Published events</label>
+              <select value={cutoff} onChange={e=>setCutoff(Number(e.target.value))} style={{minWidth:0}}>
+                {EVENTS.map((ev,i)=><option key={ev.key} value={i} disabled={ev.key!=="build1"}>Up to {ev.name} (Week {ev.week}){ev.key!=="build1"?" — no marks yet":""}</option>)}
+              </select>
+              <div className="hint">On live data this comes from the LMS. Only Build 1 has marks so far.</div>
+            </div>
+            <button className={"savebtn"+(saved?" ok":"")} onClick={save}>{saved?"Saved":"Save settings"}</button>
+            <div className="saved-note">Changes take effect immediately for all admin views.</div>
+          </div>
+        </div>
+
+        <div className="card pad">
+          <div className="tbl-wrap">
+            <table style={{minWidth:720}}>
+              <thead><tr><th>Event</th><th className="n">Week</th><th className="n">Marks</th><th className="n">Credits</th><th className="n">Credits possible</th><th className="n">Max CPI possible</th><th className="n">On the LMS by</th></tr></thead>
+              <tbody>
+                {evRows.map(({ev,cum,maxCpi})=>(
+                  <tr key={ev.key}>
+                    <td><span className="rowdot" style={{background:evColor(ev)}}/><b style={{color:"var(--head)"}}>{ev.name}</b></td>
+                    <td className="n tnum">{ev.week}</td>
+                    <td className="n tnum">{ev.type==="build"?100:ev.max}</td>
+                    <td className="n tnum">{ev.credits}</td>
+                    <td className="n tnum">{cum}</td>
+                    <td className="n tnum c-purple" style={{fontWeight:700}}>{maxCpi.toFixed(2)}</td>
+                    <td className="n" style={{color:"var(--muted)"}}>{ev.lmsBy}</td>
+                  </tr>
+                ))}
+                <tr><td><b>Total</b></td><td></td><td className="n tnum"><b>1000</b></td><td className="n tnum"><b>33</b></td><td className="n tnum"><b>33</b></td><td className="n tnum c-purple"><b>11.00</b></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 className="panel-title" style={{marginTop:22}}>IITGN 11-point scale</h3>
+          <p className="panel-sub">A floor counts the moment it’s reached, with no rounding up. D is the minimum pass; E and F earn no credits.</p>
+          <div className="tbl-wrap"><table style={{minWidth:420}}>
+            <thead><tr><th>Grade</th><th className="n">From %</th><th className="n">Point</th><th>Result</th></tr></thead>
+            <tbody>{SCALE.map(r=><tr key={r.grade}><td><Chip g={r.grade}/></td><td className="n tnum">{r.from}</td><td className="n tnum">{r.point}</td><td style={{color:"var(--muted)"}}>{r.point>=4?"Pass":"Backlog"}</td></tr>)}</tbody>
+          </table></div>
+
+          <h3 className="panel-title" style={{marginTop:22}}>Data &amp; definitions</h3>
+          <p className="section-note" style={{marginTop:8}}>
+            Marks: Cohort 2 LMS exports, Weeks 0–3 — group discussion from Week 2 (/30), mock interview and project presentation from Week 3 (converted to mock /30 and mini-project /40). Dummy “Student 14” excluded, leaving {total} students, {graded} graded on Build 1.
+            <b> CPI earned</b> = credit points ÷ 33; <b>CPI unlocked</b> = 11 × credits unlocked ÷ 33; <b>share of unlocked CPI</b> = credit points ÷ (11 × credits unlocked). The engine is ready for Exam 1 onward, including the Module 2 regrade on Exam 1 + Build 2.
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ---------- App ---------- */
+function App(){
+  const [tab,setTab]=useState("student");
+  const [sel,setSel]=useState(22);     // Rohit Pandey — a complete, representative record
+  const [cutoff,setCutoff]=useState(0); // Build 1
+  const [cfg,setCfg]=useState(DEFAULT_CFG);
+  const [theme,setTheme]=useState(()=>{try{return localStorage.getItem("cpi-adm-theme")||"auto"}catch(e){return "auto"}});
+  useEffect(()=>{const r=document.documentElement; theme==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",theme); try{localStorage.setItem("cpi-adm-theme",theme)}catch(e){}},[theme]);
+  const all=useMemo(()=>STUDENTS.map(s=>compute(s,cutoff)),[cutoff]);
+  const gradedN=all.filter(a=>a.complete).length;
+  const cycle=()=>setTheme(t=>t==="auto"?"light":t==="light"?"dark":"auto");
+  const openStudent=(roll)=>{setSel(roll);setTab("student");window.scrollTo({top:0,behavior:"smooth"});};
+
+  return (
+    <>
+      <header className="topbar"><div className="topbar-in">
+        <div className="logo">Admin Panel<small>· Cohort 2</small></div>
+        <nav className="nav-tabs">
+          {[["student","Student Overview"],["class","Class Overview"],["settings","Settings"]].map(([k,l])=>(
+            <button key={k} className="ntab" aria-current={tab===k} onClick={()=>setTab(k)}>{l}</button>
+          ))}
+        </nav>
+        <div className="nav-right">
+          <button className="btn iconbtn" onClick={cycle} title={"Theme: "+theme} aria-label="Switch theme">{theme==="dark"?"◐":theme==="light"?"○":"◑"}</button>
+          <span>Admin</span>
+          <button className="btn">Sign out</button>
+        </div>
+      </div></header>
+
+      <div className="banner"><div className="banner-in">
+        <span className="dot-live"></span>
+        <span><b>Live data · Cohort 2</b> — 39 students, marks through Week 3. Build 1 (subject M1) is graded; later events fill in as their marks arrive.</span>
+      </div></div>
+
+      <main className="wrap">
+        {tab==="student" && <>
+          <div className="pagehead"><h1>Student <em>overview</em></h1><p>Credits, CPI and event results up to the event you pick, against the class of 39.</p></div>
+          <StudentOverview all={all} sel={sel} setSel={setSel} cutoff={cutoff} setCutoff={setCutoff} cfg={cfg}/>
+        </>}
+        {tab==="class" && <ClassOverview all={all} cutoff={cutoff} setCutoff={setCutoff} openStudent={openStudent} cfg={cfg}/>}
+        {tab==="settings" && <Settings cfg={cfg} setCfg={setCfg} cutoff={cutoff} setCutoff={setCutoff} total={STUDENTS.length} graded={gradedN}/>}
+      </main>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
